@@ -1,149 +1,208 @@
-// // #region "importing and cofig stuff"
-// import express from "express";
-// import Database from "better-sqlite3";
-// import cors from "cors";
-// // import {createApplicant, createInterview, createInterviewer} from "./setup"
+// #region "importing and cofig stuff"
+import express from "express";
+import Database from "better-sqlite3";
+import cors from "cors";
+import { createUserSubreddit } from "./setup";
+// import {createuser, createuserSubreddit, createuserSubredditer} from "./setup"
 
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// const db = new Database("./data.db", {
-//   verbose: console.log,
-// });
-// // #endregion
+const db = new Database("./data.db", {
+  verbose: console.log,
+});
+// #endregion
 
-// // #region "Sql queries"
-// // const getInterviewsFromApplicant = db.prepare(`
-// // SELECT interviews.*, interviewers.name as 'interviewerName', interviewers.email as 'interviewerEmail' FROM interviews
-// // JOIN interviewers ON interviews.interviewerId = interviewers.id
-// // WHERE interviews.applicantId = ?;
-// // `)
 
-// const getAllApplicants = db.prepare(`
-// SELECT applicants.* FROM applicants;
-// `);
+// #region "Sql queries"
 
-// const getApplicantById = db.prepare(`
-// SELECT * FROM applicants WHERE id = ?
-// `);
 
-// const getAllInterviewers = db.prepare(`
-// SELECT interviewers.* FROM interviewers;
-// `);
+// #region 'Queries to get all rows from tables'
+const getAllusers = db.prepare(`
+SELECT users.* FROM users;
+`);
 
-// const getInterviewerById = db.prepare(`
-// SELECT * FROM interviewers WHERE id = ?
-// `);
+const getAllSubreddits = db.prepare(`
+SELECT * FROM subreddits;
+`);
 
-// const getAllinterviews = db.prepare(`
-// SELECT * FROM interviews;
-// `);
+const getAllLogins = db.prepare(`
+SELECT * FROM logins;
+`);
 
-// const getInterviewById = db.prepare(`
-// SELECT * FROM interviews WHERE id = ?
-// `);
+const getAllComments = db.prepare(`
+SELECT * FROM comments;
+`);
 
-// const getApplicantByinterviewerId = db.prepare(`SELECT DISTINCT applicants.*, interviews.date, interviews.score FROM applicants
-// JOIN interviews ON applicants.id = interviews.applicantId
-// WHERE interviews.interviewerId = ?;`)
+const getAllPosts = db.prepare(`
+SELECT * FROM posts;
+`);
 
-// const getInterviewerByApplicantId = db.prepare(`SELECT DISTINCT interviewers.*, interviews.date, interviews.score FROM interviewers
-// JOIN interviews ON interviewers.id = interviews.interviewerId
-// WHERE interviews.applicantId = ?;`) // if i want to remove duplicates just remove .date and .score and that new date with same entry will be removed
+const getAllUserSubreddits = db.prepare(`
+SELECT userSubreddits.* FROM userSubreddits;
+`);
+// #endregion
 
-// const deleteApplicant = db.prepare(`
-// DELETE FROM applicants WHERE id = ?;
+// #region 'Queries to get individual records from tables'
+const getUserById = db.prepare(`
+SELECT * FROM users WHERE id = ?
+`);
+
+const getCommentById = db.prepare(`
+SELECT * FROM comments WHERE id = ?
+`);
+
+const getPostById = db.prepare(`
+SELECT * FROM posts WHERE id = ?
+`);
+
+const getLoginById = db.prepare(`
+SELECT * FROM logins WHERE id = ?
+`);
+
+const getSubredditById = db.prepare(`
+SELECT * FROM subreddits WHERE id = ?
+`);
+
+const getUserSubredditById = db.prepare(`
+SELECT * FROM userSubreddits WHERE id = ?
+`);
+// #endregion
+
+// #region 'Join querys relationships'
+const getUsersBySubredditId = db.prepare(`SELECT DISTINCT users.* FROM users
+JOIN userSubreddits ON users.id = userSubreddits.userId
+WHERE userSubreddits.subredditId = ?;`)
+
+const getSubredditsByUserId = db.prepare(`SELECT DISTINCT subreddits.* FROM subreddits
+JOIN userSubreddits ON subreddits.id = userSubreddits.subredditId
+WHERE userSubreddits.userId = ?;`) // if i want to remove duplicates just remove .date and .score and that new date with same entry will be removed
+
+const getPostsForUser = db.prepare(`
+SELECT * FROM posts
+WHERE userId = ?;
+`);
+
+const getLoginsForUser = db.prepare(`
+SELECT * FROM logins
+WHERE userId = ?;
+`);
+
+const getCommentsForUser = db.prepare(`
+SELECT * FROM comments
+WHERE userId = ?;
+`);
+
+const getCommentsForPost = db.prepare(`
+SELECT * FROM comments
+WHERE postId = ?;
+`);
+
+const getPostsForSubreddit = db.prepare(`
+SELECT * FROM posts
+WHERE subredditId = ?;
+`);
+// #endregion
+
+// #region 'SQL CUD operations
+
+// const deleteuser = db.prepare(`
+// DELETE FROM users WHERE id = ?;
 // `)
 
-// const deleteInterviewer = db.prepare(`
-// DELETE FROM interviewers WHERE id = ?;
+// const deleteuserSubredditer = db.prepare(`
+// DELETE FROM userSubredditers WHERE id = ?;
 // `)
 
-// const deleteInterview = db.prepare(`
-// DELETE FROM interviews WHERE id = ?;
+// const deleteuserSubreddit = db.prepare(`
+// DELETE FROM userSubreddits WHERE id = ?;
 // `)
 
-// // const deleteApplicantInterviews = db.prepare(`
-// // DELETE FROM interviews WHERE applicantId = ?;
-// // `)
-
-// // const deleteInterviewerInterviews = db.prepare(`
-// // DELETE FROM interviews WHERE interviewerId = ?;
-// // `)
-
-// const updateApplicant = db.prepare(`
-// UPDATE applicants SET name = ?, email = ?;
+// const updateser = db.prepare(`
+// UPDATE users SET name = ?, email = ?;
 // `)
 
-// const updateInterviewer = db.prepare(`
-// UPDATE interviewers SET name = ?, email = ?;
+// const updateuserSubredditer = db.prepare(`
+// UPDATE userSubredditers SET name = ?, email = ?;
 // `)
 
-// const updateInterview = db.prepare(`
-// UPDATE interviews SET applicantId = ?, interviewerId = ?, date = ?, score = ?;
+// const updateuserSubreddit = db.prepare(`
+// UPDATE userSubreddits SET userId = ?, userSubredditerId = ?, date = ?, score = ?;
 // `)
 
-// const deleteAllInterviewsForApplicant = db.prepare(`
-// DELETE FROM interviews WHERE applicantId = ?;
+// const deleteAlluserSubredditsForuser = db.prepare(`
+// DELETE FROM userSubreddits WHERE userId = ?;
 // `)
 
-// const deleteAllInterviewsForInterviewer = db.prepare(`
-// DELETE FROM interviews WHERE interviewerId = ?;
+// const deleteAlluserSubredditsForuserSubredditer = db.prepare(`
+// DELETE FROM userSubreddits WHERE userSubredditerId = ?;
 // `)
-// // #endregion
 
-// // #region 'End points API'
+// #endregion
 
-// // #region 'APPLICANTS end points'
-// app.get("/applicants", (req, res) => {
 
-//   const applicants = getAllApplicants.all();
+// #endregion
 
-//   for (const applicant of applicants) {
 
-//     const interviewer = getInterviewerByApplicantId.all(applicant.id)
-//     applicant.interviewers = interviewer;
+// #region 'End points API'
 
-//   }
 
-//   res.send(applicants);
+// #region 'users end points'
+app.get("/users", (req, res) => {
 
-// });
+  const users = getAllusers.all();
 
-// app.get("/applicants/:id", (req, res) => {
+  for (const user of users) {
 
-//   const id = req.params.id;
-//   const applicant = getApplicantById.get(id);
+    const subreddits = getSubredditsByUserId.all(user.id)
+    user.subreddits = subreddits;
+
+    const posts = getPostsForUser.all(user.id)
+    user.posts = posts;
+
+  }
+
+  res.send(users);
+
+});
+
+app.get("/users/:id", (req, res) => {
+
+  const id = req.params.id;
+  const user = getUserById.get(id);
   
-//   if (applicant) {
+  if (user) {
 
-//     const interviewer = getInterviewerByApplicantId.all(applicant.id)
-//     applicant.interviewer = interviewer;
+    const subreddits = getSubredditsByUserId.all(user.id)
+    user.subreddits = subreddits;
 
-//     res.send(applicant);
+    const posts = getPostsForUser.all(user.id)
+    user.posts = posts;
 
-//   }
+    res.send(user);
 
-//   else {
-//     res.send({"error": "undefined"})
-//   }
+  }
 
-// });
+  else {
+    res.send({"error": "undefined"})
+  }
 
-// app.post('/applicants', (req, res) => {
+});
+
+// app.post('/users', (req, res) => {
 
 //   // creating an museum is still the same as last week
 //   const { name, email } = req.body
-//   const info = createApplicant.run(name, email)
+//   const info = createuser.run(name, email)
 
 //   // const errors = []
 
 //   // if (typeof name !== 'string') errors.push()
 
 //   if (info.changes > 0) {
-//     const applicant = getApplicantById.get(info.lastInsertRowid)
-//     res.send(applicant)
+//     const user = getuserById.get(info.lastInsertRowid)
+//     res.send(user)
 //   } 
   
 //   else {
@@ -152,32 +211,32 @@
 
 // })
 
-// app.delete('/applicants/:id', (req, res) => {
+// app.delete('/users/:id', (req, res) => {
 
 //   const id = req.params.id
-//   deleteAllInterviewsForApplicant.run(id)
-//   const info = deleteApplicant.run(id)
+//   deleteAlluserSubredditsForuser.run(id)
+//   const info = deleteuser.run(id)
 
 //   if (info.changes === 0) {
-//     res.status(404).send({ error: 'applicant not found.' })
+//     res.status(404).send({ error: 'user not found.' })
 //   } 
   
 //   else {
-//     res.send({ message: 'applicant deleted.' })
+//     res.send({ message: 'user deleted.' })
 //   }
 
 // })
 
-// app.patch('/applicants/:id', (req, res) => {
+// app.patch('/users/:id', (req, res) => {
 
 //   const id = req.params.id;
 //   const { name, email } = req.body
 
-//   const info = updateApplicant.run(name, email)
-//   const updatedApplicant = getApplicantById.get(Number(id))
+//   const info = updateuser.run(name, email)
+//   const updateduser = getuserById.get(Number(id))
 
 //   if (info.changes > 0) {
-//     res.send(updatedApplicant)
+//     res.send(updateduser)
 //   }
 
 //   else {
@@ -185,56 +244,43 @@
 //   }
 
 // })
-// // #endregion
+// #endregion
 
-// // #region 'INTERVIEWERS end points'
-// app.get("/interviewers", (req, res) => {
+// #region 'userSubreddits end points'
+app.get("/userSubreddits", (req, res) => {
 
-//   const interviewers = getAllInterviewers.all();
+  const userSubreddits = getAllUserSubreddits.all();
+  res.send(userSubreddits);
 
-//   for (const interviewer of interviewers) {
+});
 
-//     const applicants = getApplicantByinterviewerId.all(interviewer.id)
-//     interviewer.applicants = applicants;
+app.get("/userSubreddits/:id", (req, res) => {
 
-//   }
+  const id = req.params.id;
+  const userSubreddit = getUserSubredditById.get(id);
 
-//   res.send(interviewers);
+  if (userSubreddit) {
+    res.send(userSubreddit);
+  }
 
-// });
+  else {
+    res.send({"error": "undefined"})
+  }
 
-// app.get("/interviewers/:id", (req, res) => {
+});
 
-//   const id = req.params.id;
-//   const interviewer = getInterviewerById.get(id);
+// app.post('/userSubreddits', (req, res) => {
 
-//   if (interviewer) {
-
-//     const applicants = getApplicantByinterviewerId.all(interviewer.id)
-//     interviewer.applicants = applicants;
-
-//     res.send(interviewer);
-
-//   }
-
-//   else {
-//     res.send({"error": "undefined"})
-//   }
-
-// });
-
-// app.post('/interviewers', (req, res) => {
-
-//   const { name, email } = req.body
-//   const info = createInterviewer.run(name, email)
+//   const { userId, subbreditId } = req.body
+//   const info = createUserSubreddit.run(userId, subbreditId)
 
 //   // const errors = []
 
 //   // if (typeof name !== 'string') errors.push()
 
 //   if (info.changes > 0) {
-//     const interviewer = getInterviewerById.get(info.lastInsertRowid)
-//     res.send(interviewer)
+//     const userSubreddit = getUserSubredditById.get(info.lastInsertRowid)
+//     res.send(userSubreddit)
 //   } 
   
 //   else {
@@ -243,43 +289,43 @@
 
 // })
 
-// app.delete('/interviewers/:id', (req, res) => {
+// app.delete('/userSubreddits/:id', (req, res) => {
 
 //   const id = req.params.id
-//   deleteAllInterviewsForInterviewer.run(id)
-//   const interviews = getAllinterviews.all()
+//   // deleteAlluserSubredditsForuserSubredditer.run(id)
+//   const userSubreddits = getAllUserSubreddits.all()
 
-//   for (const interview of interviews) {
+//   for (const userSubreddit of userSubreddits) {
 
-//     if (interview.interviewerId === id) {
-//       console.log("interview deleting id :", interview)
-//       deleteInterview.run(interview.id)
+//     if (userSubreddit.subredditId === id) {
+//       console.log("userSubreddit deleting id :", userSubreddit)
+//       deleteuserSubreddit.run(userSubreddit.id)
 //     }
 
 //   }
 
-//   const info = deleteInterviewer.run(id)
+//   const info = deleteuserSubredditer.run(id)
 
 //   if (info.changes === 0) {
-//     res.status(404).send({ error: 'interviewer not found.' })
+//     res.status(404).send({ error: 'userSubredditer not found.' })
 //   } 
   
 //   else {
-//     res.send({ message: 'interviewer deleted.' })
+//     res.send({ message: 'userSubredditer deleted.' })
 //   }
 
 // })
 
-// app.patch('/interviewers/:id', (req, res) => {
+// app.patch('/userSubredditers/:id', (req, res) => {
 
 //   const id = req.params.id;
 //   const { name, email } = req.body
 
-//   const info = updateInterview.run(name, email)
-//   const updatedInterviewer = getInterviewerById.get(Number(id))
+//   const info = updateuserSubreddit.run(name, email)
+//   const updateduserSubredditer = getuserSubredditerById.get(Number(id))
 
 //   if (info.changes > 0) {
-//     res.send(updatedInterviewer)
+//     res.send(updateduserSubredditer)
 //   }
 
 //   else {
@@ -287,44 +333,69 @@
 //   }
 
 // })
-// // #endregion
+// #endregion
 
-// // #region 'INTERVIEWS end points'
-// app.get("/interviews", (req, res) => {
+// #region 'posts end points'
+app.get("/posts", (req, res) => {
 
-//   const interviews = getAllinterviews.all();
-//   res.send(interviews);
+  const posts = getAllPosts.all();
 
-// });
+  for (const post of posts) {
 
-// app.get("/interviews/:id", (req, res) => {
+    const comments = getCommentsForPost.all(post.id)
+    post.comments = comments;
 
-//     const id = req.params.id;
-//     const interview = getInterviewById.get(id);
+    const user = getUserById.get(post.userId);
+    post.user = user;
 
-//     if (interview) {
-//       res.send(interview);
-//     }
+    const subreddit = getSubredditById.get(post.subredditId);
+    post.subreddit = subreddit;
 
-//     else {
-//       res.send({"error": "undefined"})
-//     }
+  }
 
-// });
+  res.send(posts);
 
-// app.post('/interviews', (req, res) => {
+});
+
+app.get("/posts/:id", (req, res) => {
+
+    const id = req.params.id;
+    const post = getPostById.get(id);
+
+    if (post) {
+
+      const comments = getCommentsForPost.all(post.id)
+      post.comments = comments;
+
+      const user = getUserById.get(post.userId);
+      post.user = user;
+
+      const subreddit = getSubredditById.get(post.subredditId);
+      post.subreddit = subreddit;
+
+      res.send(post);
+
+    }
+
+    else {
+      res.send({"error": "undefined"})
+    }
+
+});
+
+// app.post('/posts', (req, res) => {
 
 //   // creating an museum is still the same as last week
-//   const { applicantId, interviewerId, date, score } = req.body
-//   const info = createInterview.run(applicantId, interviewerId, date, score)
+//   const { userId, userSubredditerId, date, score } = req.body
+//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
 
 //   // const errors = []
 
 //   // if (typeof name !== 'string') errors.push()
 
 //   if (info.changes > 0) {
-//     const interview = getInterviewById.get(info.lastInsertRowid)
-//     res.send(interview)
+//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
+//     res.send(userSubreddit)
 //   } 
   
 //   else {
@@ -333,31 +404,31 @@
 
 // })
 
-// app.delete('/interviews/:id', (req, res) => {
+// app.delete('/posts/:id', (req, res) => {
 
 //   const id = req.params.id
-//   const info = deleteInterview.run(id)
+//   const info = deleteuserSubreddit.run(id)
 
 //   if (info.changes === 0) {
-//     res.status(404).send({ error: 'interview not found.' })
+//     res.status(404).send({ error: 'userSubreddit not found.' })
 //   } 
   
 //   else {
-//     res.send({ message: 'interview deleted.' })
+//     res.send({ message: 'userSubreddit deleted.' })
 //   }
 
 // })
 
-// app.patch('/interviews/:id', (req, res) => {
+// app.patch('/posts/:id', (req, res) => {
 
 //   const id = req.params.id;
-//   const { applicantId, interviewerId, date, score } = req.body
+//   const { userId, userSubredditerId, date, score } = req.body
 
-//   const info = updateInterview.run(applicantId, interviewerId, date, score)
-//   const updatedInterview = getInterviewById.get(Number(id))
+//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
+//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
 
 //   if (info.changes > 0) {
-//     res.send(updatedInterview)
+//     res.send(updateduserSubreddit)
 //   }
 
 //   else {
@@ -365,8 +436,294 @@
 //   }
 
 // })
-// // #endregion
+// #endregion
 
-// // #endregion
+// #region 'comments end points'
+app.get("/comments", (req, res) => {
 
-// app.listen(4000, () => console.log(`Listening on: http://localhost:4000`));
+  const comments = getAllComments.all();
+
+  for (const comment of comments) {
+
+    const user = getUserById.get(comment.userId);
+    comment.user = user;
+
+    const posts = getPostById.get(comment.postId);
+    comment.post = posts;
+
+  }
+
+  res.send(comments);
+
+});
+
+app.get("/comments/:id", (req, res) => {
+
+    const id = req.params.id;
+    const comment = getCommentById.get(id)
+
+    if (comment) {
+
+      const user = getUserById.get(comment.userId);
+      comment.user = user;
+
+      const posts = getPostById.get(comment.postId);
+      comment.post = posts;
+
+      res.send(comment);
+
+    }
+
+    else {
+      res.send({"error": "undefined"})
+    }
+
+});
+
+// app.post('/comments', (req, res) => {
+
+//   // creating an museum is still the same as last week
+//   const { userId, userSubredditerId, date, score } = req.body
+//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
+
+//   // const errors = []
+
+//   // if (typeof name !== 'string') errors.push()
+
+//   if (info.changes > 0) {
+//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
+//     res.send(userSubreddit)
+//   } 
+  
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+
+// app.delete('/comments/:id', (req, res) => {
+
+//   const id = req.params.id
+//   const info = deleteuserSubreddit.run(id)
+
+//   if (info.changes === 0) {
+//     res.status(404).send({ error: 'userSubreddit not found.' })
+//   } 
+  
+//   else {
+//     res.send({ message: 'userSubreddit deleted.' })
+//   }
+
+// })
+
+// app.patch('/comments/:id', (req, res) => {
+
+//   const id = req.params.id;
+//   const { userId, userSubredditerId, date, score } = req.body
+
+//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
+//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
+
+//   if (info.changes > 0) {
+//     res.send(updateduserSubreddit)
+//   }
+
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+// #endregion
+
+// #region 'logins end points'
+app.get("/logins", (req, res) => {
+
+  const logins = getAllLogins.all();
+
+  for (const login of logins) {
+
+    const user = getUserById.get(login.userId);
+    login.user = user;
+
+  }
+
+  res.send(logins);
+
+});
+
+app.get("/logins/:id", (req, res) => {
+
+    const id = req.params.id;
+    const login = getLoginById.get(id)
+
+    if (login) {
+
+      const user = getUserById.get(login.userId);
+      login.user = user;
+
+      res.send(login);
+
+    }
+
+    else {
+      res.send({"error": "undefined"})
+    }
+
+});
+
+// app.post('/logins', (req, res) => {
+
+//   // creating an museum is still the same as last week
+//   const { userId, userSubredditerId, date, score } = req.body
+//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
+
+//   // const errors = []
+
+//   // if (typeof name !== 'string') errors.push()
+
+//   if (info.changes > 0) {
+//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
+//     res.send(userSubreddit)
+//   } 
+  
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+
+// app.delete('/logins/:id', (req, res) => {
+
+//   const id = req.params.id
+//   const info = deleteuserSubreddit.run(id)
+
+//   if (info.changes === 0) {
+//     res.status(404).send({ error: 'userSubreddit not found.' })
+//   } 
+  
+//   else {
+//     res.send({ message: 'userSubreddit deleted.' })
+//   }
+
+// })
+
+// app.patch('/logins/:id', (req, res) => {
+
+//   const id = req.params.id;
+//   const { userId, userSubredditerId, date, score } = req.body
+
+//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
+//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
+
+//   if (info.changes > 0) {
+//     res.send(updateduserSubreddit)
+//   }
+
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+// #endregion
+
+// #region 'subreddits end points'
+app.get("/subreddits", (req, res) => {
+
+  const subreddits = getAllSubreddits.all();
+
+  for (const subreddit of subreddits) {
+
+    const users = getUsersBySubredditId.all(subreddit.id)
+    subreddit.users = users;
+
+    const posts = getPostsForSubreddit.all(subreddit.id)
+    subreddit.posts = posts;
+
+  }
+
+  res.send(subreddits);
+
+});
+
+app.get("/subreddits/:id", (req, res) => {
+
+    const id = req.params.id;
+    const subreddit = getSubredditById.get(id);
+
+    if (subreddit) {
+
+      const users = getUsersBySubredditId.all(subreddit.id)
+      subreddit.users = users;
+
+      const posts = getPostsForSubreddit.all(subreddit.id)
+      subreddit.posts = posts;
+
+      res.send(subreddit);
+
+    }
+
+    else {
+      res.send({"error": "undefined"})
+    }
+
+});
+
+// app.post('/subreddits', (req, res) => {
+
+//   // creating an museum is still the same as last week
+//   const { userId, userSubredditerId, date, score } = req.body
+//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
+
+//   // const errors = []
+
+//   // if (typeof name !== 'string') errors.push()
+
+//   if (info.changes > 0) {
+//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
+//     res.send(userSubreddit)
+//   } 
+  
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+
+// app.delete('/subreddits/:id', (req, res) => {
+
+//   const id = req.params.id
+//   const info = deleteuserSubreddit.run(id)
+
+//   if (info.changes === 0) {
+//     res.status(404).send({ error: 'userSubreddit not found.' })
+//   } 
+  
+//   else {
+//     res.send({ message: 'userSubreddit deleted.' })
+//   }
+
+// })
+
+// app.patch('/subreddits/:id', (req, res) => {
+
+//   const id = req.params.id;
+//   const { userId, userSubredditerId, date, score } = req.body
+
+//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
+//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
+
+//   if (info.changes > 0) {
+//     res.send(updateduserSubreddit)
+//   }
+
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+// #endregion
+
+
+// #endregion
+
+app.listen(4000, () => console.log(`Listening on: http://localhost:4000`));
