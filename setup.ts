@@ -119,7 +119,7 @@ const posts = [
     votes: 77,
     createdTime: "1/10/2021",
     userId: 2,
-    subredditId: 5  
+    subredditId: 4
   }
 ]
 
@@ -165,7 +165,7 @@ const comments = [
     downVotes: 18,
     dateCreated: "21/05/2029",
     userId: 1,
-    postId: 6
+    postId: 4
   },
   {
     content: "hey yooooooooo",
@@ -173,7 +173,7 @@ const comments = [
     downVotes: 11,
     dateCreated: "21/05/2022",
     userId: 2,
-    postId: 4
+    postId: 3
   },
   {
     content: "coment a",
@@ -189,7 +189,7 @@ const comments = [
     downVotes: 13,
     dateCreated: "3/05/2020",
     userId: 4,
-    postId: 3
+    postId: 1
   }
 ]
 
@@ -233,6 +233,14 @@ CREATE TABLE IF NOT EXISTS users (
   "email" TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS subreddits (
+  "id" INTEGER PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "followers" INTEGER NOT NULL,
+  "online" INTEGER NOT NULL,
+  "dateCreated" TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS posts (
   "id" INTEGER PRIMARY KEY,
   "title" TEXT NOT NULL,
@@ -244,16 +252,8 @@ CREATE TABLE IF NOT EXISTS posts (
   "createdTime" TEXT NOT NULL,
   "userId" INTEGER NOT NULL,
   "subredditId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
   FOREIGN KEY ("subredditId") REFERENCES "subreddits" ("id")
-);
-
-CREATE TABLE IF NOT EXISTS subreddits (
-  "id" INTEGER PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "followers" INTEGER NOT NULL,
-  "online" INTEGER NOT NULL,
-  "dateCreated" TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -322,12 +322,12 @@ for (const login of logins) {
   createLogin.run(login.status, login.dateCreated, login.time, login.userId)
 }
 
-for (const post of posts) {
-  createPost.run(post.title, post.content, post.linksTo, post.status, post.pic, post.votes, post.createdTime, post.userId, post.subredditId)
-}
-
 for (const subreddit of subreddits) {
   createSubreddit.run(subreddit.name, subreddit.followers, subreddit.online, subreddit.dateCreated)
+}
+
+for (const post of posts) {
+  createPost.run(post.title, post.content, post.linksTo, post.status, post.pic, post.votes, post.createdTime, post.userId, post.subredditId)
 }
 
 for (const userSubreddit of userSubreddits) {
