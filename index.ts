@@ -2,7 +2,7 @@
 import express from "express";
 import Database from "better-sqlite3";
 import cors from "cors";
-import { createUserSubreddit } from "./setup";
+import { createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser } from "./setup";
 // import {createuser, createuserSubreddit, createuserSubredditer} from "./setup"
 
 const app = express();
@@ -161,6 +161,12 @@ app.get("/users", (req, res) => {
     const posts = getPostsForUser.all(user.id)
     user.posts = posts;
 
+    const comments = getCommentsForUser.all(user.id)
+    user.comments = comments
+
+    const logins = getLoginsForUser.all(user.id)
+    user.logins = logins
+
   }
 
   res.send(users);
@@ -180,6 +186,9 @@ app.get("/users/:id", (req, res) => {
     const posts = getPostsForUser.all(user.id)
     user.posts = posts;
 
+    const comments = getCommentsForUser.all(user.id)
+    user.comments = comments
+
     res.send(user);
 
   }
@@ -190,26 +199,26 @@ app.get("/users/:id", (req, res) => {
 
 });
 
-// app.post('/users', (req, res) => {
+app.post('/users', (req, res) => {
 
-//   // creating an museum is still the same as last week
-//   const { name, email } = req.body
-//   const info = createuser.run(name, email)
+  // creating an museum is still the same as last week
+  const { firstName, lastName, userName, gender, birthday, phoneNumber, email } = req.body
+  const info = createUser.run(firstName, lastName, userName, gender, birthday, phoneNumber, email)
 
-//   // const errors = []
+  // const errors = []
 
-//   // if (typeof name !== 'string') errors.push()
+  // if (typeof name !== 'string') errors.push()
 
-//   if (info.changes > 0) {
-//     const user = getuserById.get(info.lastInsertRowid)
-//     res.send(user)
-//   } 
+  if (info.changes > 0) {
+    const user = getUserById.get(info.lastInsertRowid)
+    res.send(user)
+  } 
   
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 
 // app.delete('/users/:id', (req, res) => {
 
@@ -269,25 +278,25 @@ app.get("/userSubreddits/:id", (req, res) => {
 
 });
 
-// app.post('/userSubreddits', (req, res) => {
+app.post('/userSubreddits', (req, res) => {
 
-//   const { userId, subbreditId } = req.body
-//   const info = createUserSubreddit.run(userId, subbreditId)
+  const { userId, subbreditId } = req.body
+  const info = createUserSubreddit.run(userId, subbreditId)
 
-//   // const errors = []
+  // const errors = []
 
-//   // if (typeof name !== 'string') errors.push()
+  // if (typeof name !== 'string') errors.push()
 
-//   if (info.changes > 0) {
-//     const userSubreddit = getUserSubredditById.get(info.lastInsertRowid)
-//     res.send(userSubreddit)
-//   } 
+  if (info.changes > 0) {
+    const userSubreddit = getUserSubredditById.get(info.lastInsertRowid)
+    res.send(userSubreddit)
+  } 
   
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 
 // app.delete('/userSubreddits/:id', (req, res) => {
 
@@ -383,26 +392,26 @@ app.get("/posts/:id", (req, res) => {
 
 });
 
-// app.post('/posts', (req, res) => {
+app.post('/posts', (req, res) => {
 
-//   // creating an museum is still the same as last week
-//   const { userId, userSubredditerId, date, score } = req.body
-//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
+  // creating an museum is still the same as last week
+  const { title, content, linksTo, status, pic, votes, createdTime, userId, subredditId } = req.body
+  const info = createPost.run(title, content, linksTo, status, pic, votes, createdTime, userId, subredditId)
 
-//   // const errors = []
+  // const errors = []
 
-//   // if (typeof name !== 'string') errors.push()
+  // if (typeof name !== 'string') errors.push()
 
-//   if (info.changes > 0) {
-//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
-//     res.send(userSubreddit)
-//   } 
+  if (info.changes > 0) {
+    const post = getPostById.get(info.lastInsertRowid)
+    res.send(post)
+  } 
   
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 
 // app.delete('/posts/:id', (req, res) => {
 
@@ -480,26 +489,26 @@ app.get("/comments/:id", (req, res) => {
 
 });
 
-// app.post('/comments', (req, res) => {
+app.post('/comments', (req, res) => {
 
-//   // creating an museum is still the same as last week
-//   const { userId, userSubredditerId, date, score } = req.body
-//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
+  // creating an museum is still the same as last week
+  const { content, upVotes, downVotes, dateCreated, userId, postId } = req.body
+  const info = createComment.run( content, upVotes, downVotes, dateCreated, userId, postId )
 
-//   // const errors = []
+  // const errors = []
 
-//   // if (typeof name !== 'string') errors.push()
+  // if (typeof name !== 'string') errors.push()
 
-//   if (info.changes > 0) {
-//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
-//     res.send(userSubreddit)
-//   } 
+  if (info.changes > 0) {
+    const comment = getCommentById.get(info.lastInsertRowid)
+    res.send(comment)
+  } 
   
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 
 // app.delete('/comments/:id', (req, res) => {
 
@@ -571,26 +580,26 @@ app.get("/logins/:id", (req, res) => {
 
 });
 
-// app.post('/logins', (req, res) => {
+app.post('/logins', (req, res) => {
 
-//   // creating an museum is still the same as last week
-//   const { userId, userSubredditerId, date, score } = req.body
-//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
+  // creating an museum is still the same as last week
+  const { status, dateCreated, time, userId } = req.body
+  const info = createLogin.run(status, dateCreated, time, userId)
 
-//   // const errors = []
+  // const errors = []
 
-//   // if (typeof name !== 'string') errors.push()
+  // if (typeof name !== 'string') errors.push()
 
-//   if (info.changes > 0) {
-//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
-//     res.send(userSubreddit)
-//   } 
+  if (info.changes > 0) {
+    const logins = getLoginById.get(info.lastInsertRowid)
+    res.send(logins)
+  } 
   
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 
 // app.delete('/logins/:id', (req, res) => {
 
@@ -668,26 +677,26 @@ app.get("/subreddits/:id", (req, res) => {
 
 });
 
-// app.post('/subreddits', (req, res) => {
+app.post('/subreddits', (req, res) => {
 
-//   // creating an museum is still the same as last week
-//   const { userId, userSubredditerId, date, score } = req.body
-//   const info = createuserSubreddit.run(userId, userSubredditerId, date, score)
+  // creating an museum is still the same as last week
+  const { name, followers, online, dateCreated } = req.body
+  const info = createSubreddit.run(name, followers, online, dateCreated)
 
-//   // const errors = []
+  // const errors = []
 
-//   // if (typeof name !== 'string') errors.push()
+  // if (typeof name !== 'string') errors.push()
 
-//   if (info.changes > 0) {
-//     const userSubreddit = getuserSubredditById.get(info.lastInsertRowid)
-//     res.send(userSubreddit)
-//   } 
+  if (info.changes > 0) {
+    const subreddits = getSubredditById.get(info.lastInsertRowid)
+    res.send(subreddits)
+  } 
   
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 
 // app.delete('/subreddits/:id', (req, res) => {
 
