@@ -213,6 +213,9 @@ const userSubreddits = [
 ]
 // #endregion
 
+
+// #region 'Creating tables after droping etc sql'
+
 // DROP TABLE IF EXISTS logins;
 // DROP TABLE IF EXISTS subreddits;
 // DROP TABLE IF EXISTS userSubreddits;
@@ -220,7 +223,7 @@ const userSubreddits = [
 // DROP TABLE IF EXISTS users;
 // DROP TABLE IF EXISTS comments;
 
-// #region 'Creating tables after droping etc sql'
+
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   "id" INTEGER PRIMARY KEY,

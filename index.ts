@@ -70,6 +70,86 @@ SELECT * FROM userSubreddits WHERE id = ?
 `);
 // #endregion
 
+// #region 'Queries to update individual records from tables'
+const updateUser = db.prepare(`
+UPDATE users SET firstName = ?, lastName = ?, userName = ?, gender = ?, birthday = ?, phoneNumber = ?, email = ?;
+`)
+
+const updateLogin = db.prepare(`
+UPDATE logins SET status = ?, dateCreated = ?, time = ?, userId = ?;
+`)
+
+const updatePost = db.prepare(`
+UPDATE posts SET title = ?, content = ?, linksTo = ?, status = ?, pic = ?, votes = ?, createdTime = ?, userId = ?, subredditId = ?;
+`)
+
+const updateSubreddit = db.prepare(`
+UPDATE subreddits SET name = ?, followers = ?, online = ?, dateCreated = ?;
+`)
+
+const updateComment = db.prepare(`
+UPDATE comments SET content = ?, upVotes = ?, downVotes = ?, dateCreated = ?, userId = ?, postId = ?;
+`)
+
+const updateUserSubreddit = db.prepare(`
+UPDATE userSubreddits SET userId = ?, subredditId = ?;
+`)
+// #endregion
+
+// #region 'Queries to delete individual records from tables'
+const deleteUser = db.prepare(`
+DELETE FROM users WHERE id = ?;
+`)
+
+const deleteComment = db.prepare(`
+DELETE FROM comments WHERE id = ?;
+`)
+
+const deleteLogin = db.prepare(`
+DELETE FROM logins WHERE id = ?;
+`)
+
+const deletePost = db.prepare(`
+DELETE FROM posts WHERE id = ?;
+`)
+
+const deleteUserSubreddit = db.prepare(`
+DELETE FROM userSubreddits WHERE id = ?;
+`)
+
+const deleteSubreddit = db.prepare(`
+DELETE FROM subreddits WHERE id = ?;
+`)
+
+const deleteAllUserSubredditsForUser = db.prepare(`
+DELETE FROM userSubreddits WHERE userId = ?;
+`)
+
+const deleteAllUserSubredditsForSubreddit = db.prepare(`
+DELETE FROM userSubreddits WHERE subredditId = ?;
+`)
+
+const deleteAllLoginsForUser = db.prepare(`
+DELETE FROM logins WHERE userId = ?;
+`)
+
+const deleteAllCommentsForUser = db.prepare(`
+DELETE FROM comments WHERE userId = ?;
+`)
+
+const deleteAllPostsForUser = db.prepare(`
+DELETE FROM posts WHERE userId = ?;
+`)
+
+const deleteAllPostsForSubreddit = db.prepare(`
+DELETE FROM posts WHERE subredditId = ?;
+`)
+
+const deleteAllCommentsForPost = db.prepare(`
+DELETE FROM comments WHERE postId = ?;
+`)
+// #endregion
+
 // #region 'Join querys relationships'
 const getUsersBySubredditId = db.prepare(`SELECT DISTINCT users.* FROM users
 JOIN userSubreddits ON users.id = userSubreddits.userId
@@ -104,43 +184,6 @@ SELECT * FROM posts
 WHERE subredditId = ?;
 `);
 // #endregion
-
-// #region 'SQL CUD operations
-
-// const deleteuser = db.prepare(`
-// DELETE FROM users WHERE id = ?;
-// `)
-
-// const deleteuserSubredditer = db.prepare(`
-// DELETE FROM userSubredditers WHERE id = ?;
-// `)
-
-// const deleteuserSubreddit = db.prepare(`
-// DELETE FROM userSubreddits WHERE id = ?;
-// `)
-
-// const updateser = db.prepare(`
-// UPDATE users SET name = ?, email = ?;
-// `)
-
-// const updateuserSubredditer = db.prepare(`
-// UPDATE userSubredditers SET name = ?, email = ?;
-// `)
-
-// const updateuserSubreddit = db.prepare(`
-// UPDATE userSubreddits SET userId = ?, userSubredditerId = ?, date = ?, score = ?;
-// `)
-
-// const deleteAlluserSubredditsForuser = db.prepare(`
-// DELETE FROM userSubreddits WHERE userId = ?;
-// `)
-
-// const deleteAlluserSubredditsForuserSubredditer = db.prepare(`
-// DELETE FROM userSubreddits WHERE userSubredditerId = ?;
-// `)
-
-// #endregion
-
 
 // #endregion
 
@@ -220,39 +263,44 @@ app.post('/users', (req, res) => {
 
 })
 
-// app.delete('/users/:id', (req, res) => {
+app.delete('/users/:id', (req, res) => {
+ 
+  const id = req.params.id
 
-//   const id = req.params.id
-//   deleteAlluserSubredditsForuser.run(id)
-//   const info = deleteuser.run(id)
+  deleteAllUserSubredditsForUser.run(id)
+  deleteAllPostsForUser.run(id)
+  deleteAllLoginsForUser.run(id)
+  deleteAllCommentsForUser.run(id)
 
-//   if (info.changes === 0) {
-//     res.status(404).send({ error: 'user not found.' })
-//   } 
+  const info = deleteUser.run(id)
+
+  if (info.changes === 0) {
+    res.status(404).send({ error: 'user not found.' })
+  } 
   
-//   else {
-//     res.send({ message: 'user deleted.' })
-//   }
+  else {
+    res.send({ message: 'user deleted.' })
+  }
 
-// })
+})
 
-// app.patch('/users/:id', (req, res) => {
+app.patch('/users/:id', (req, res) => {
 
-//   const id = req.params.id;
-//   const { name, email } = req.body
+  const id = req.params.id;
+  const { firstName, lastName, userName, gender, birthday, phoneNumber, email } = req.body
 
-//   const info = updateuser.run(name, email)
-//   const updateduser = getuserById.get(Number(id))
+  const info = updateUser.run(firstName, lastName, userName, gender, birthday, phoneNumber, email)
+  const updatedUser = getUserById.get(Number(id))
 
-//   if (info.changes > 0) {
-//     res.send(updateduser)
-//   }
+  if (info.changes > 0) {
+    res.send(updatedUser)
+  }
 
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 // #endregion
 
 // #region 'userSubreddits end points'
@@ -298,50 +346,40 @@ app.post('/userSubreddits', (req, res) => {
 
 })
 
-// app.delete('/userSubreddits/:id', (req, res) => {
+app.delete('/userSubreddits/:id', (req, res) => {
 
-//   const id = req.params.id
-//   // deleteAlluserSubredditsForuserSubredditer.run(id)
-//   const userSubreddits = getAllUserSubreddits.all()
+  const id = req.params.id
+  deleteUserSubreddit.run(id)
 
-//   for (const userSubreddit of userSubreddits) {
+  const info = deleteUserSubreddit.run(id)
 
-//     if (userSubreddit.subredditId === id) {
-//       console.log("userSubreddit deleting id :", userSubreddit)
-//       deleteuserSubreddit.run(userSubreddit.id)
-//     }
-
-//   }
-
-//   const info = deleteuserSubredditer.run(id)
-
-//   if (info.changes === 0) {
-//     res.status(404).send({ error: 'userSubredditer not found.' })
-//   } 
+  if (info.changes === 0) {
+    res.status(404).send({ error: 'userSubreddit not found.' })
+  } 
   
-//   else {
-//     res.send({ message: 'userSubredditer deleted.' })
-//   }
+  else {
+    res.send({ message: 'userSubreddit deleted.' })
+  }
 
-// })
+})
 
-// app.patch('/userSubredditers/:id', (req, res) => {
+app.patch('/userSubredditers/:id', (req, res) => {
 
-//   const id = req.params.id;
-//   const { name, email } = req.body
+  const id = req.params.id;
+  const { userId, subredditId } = req.body
 
-//   const info = updateuserSubreddit.run(name, email)
-//   const updateduserSubredditer = getuserSubredditerById.get(Number(id))
+  const info = updateUserSubreddit.run(userId, subredditId)
+  const updatedUserSubreddit = getUserSubredditById.get(Number(id))
 
-//   if (info.changes > 0) {
-//     res.send(updateduserSubredditer)
-//   }
+  if (info.changes > 0) {
+    res.send(updatedUserSubreddit)
+  }
 
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 // #endregion
 
 // #region 'posts end points'
@@ -413,38 +451,40 @@ app.post('/posts', (req, res) => {
 
 })
 
-// app.delete('/posts/:id', (req, res) => {
+app.delete('/posts/:id', (req, res) => {
 
-//   const id = req.params.id
-//   const info = deleteuserSubreddit.run(id)
+  const id = req.params.id
+  deleteAllCommentsForPost.run(id)
 
-//   if (info.changes === 0) {
-//     res.status(404).send({ error: 'userSubreddit not found.' })
-//   } 
+  const info = deletePost.run(id)
+
+  if (info.changes === 0) {
+    res.status(404).send({ error: 'post not found.' })
+  } 
   
-//   else {
-//     res.send({ message: 'userSubreddit deleted.' })
-//   }
+  else {
+    res.send({ message: 'post deleted.' })
+  }
 
-// })
+})
 
-// app.patch('/posts/:id', (req, res) => {
+app.patch('/posts/:id', (req, res) => {
 
-//   const id = req.params.id;
-//   const { userId, userSubredditerId, date, score } = req.body
+  const id = req.params.id;
+  const { title, content, linksTo, status, pic, votes, createdTime, userId, subredditId } = req.body
 
-//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
-//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
+  const info = updatePost.run(title, content, linksTo, status, pic, votes, createdTime, userId, subredditId)
+  const updatedPost = getPostById.get(Number(id))
 
-//   if (info.changes > 0) {
-//     res.send(updateduserSubreddit)
-//   }
+  if (info.changes > 0) {
+    res.send(updatedPost)
+  }
 
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 // #endregion
 
 // #region 'comments end points'
@@ -510,38 +550,38 @@ app.post('/comments', (req, res) => {
 
 })
 
-// app.delete('/comments/:id', (req, res) => {
+app.delete('/comments/:id', (req, res) => {
 
-//   const id = req.params.id
-//   const info = deleteuserSubreddit.run(id)
+  const id = req.params.id
+  const info = deleteComment.run(id)
 
-//   if (info.changes === 0) {
-//     res.status(404).send({ error: 'userSubreddit not found.' })
-//   } 
+  if (info.changes === 0) {
+    res.status(404).send({ error: 'comment not found.' })
+  } 
   
-//   else {
-//     res.send({ message: 'userSubreddit deleted.' })
-//   }
+  else {
+    res.send({ message: 'comment deleted.' })
+  }
 
-// })
+})
 
-// app.patch('/comments/:id', (req, res) => {
+app.patch('/comments/:id', (req, res) => {
 
-//   const id = req.params.id;
-//   const { userId, userSubredditerId, date, score } = req.body
+  const id = req.params.id;
+  const { content, upVotes, downVotes, dateCreated, userId, postId } = req.body
 
-//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
-//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
+  const info = updateComment.run(content, upVotes, downVotes, dateCreated, userId, postId)
+  const updatedComment = getCommentById.get(Number(id))
 
-//   if (info.changes > 0) {
-//     res.send(updateduserSubreddit)
-//   }
+  if (info.changes > 0) {
+    res.send(updatedComment)
+  }
 
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 // #endregion
 
 // #region 'logins end points'
@@ -601,38 +641,38 @@ app.post('/logins', (req, res) => {
 
 })
 
-// app.delete('/logins/:id', (req, res) => {
+app.delete('/logins/:id', (req, res) => {
 
-//   const id = req.params.id
-//   const info = deleteuserSubreddit.run(id)
+  const id = req.params.id
+  const info = deleteLogin.run(id)
 
-//   if (info.changes === 0) {
-//     res.status(404).send({ error: 'userSubreddit not found.' })
-//   } 
+  if (info.changes === 0) {
+    res.status(404).send({ error: 'login not found.' })
+  } 
   
-//   else {
-//     res.send({ message: 'userSubreddit deleted.' })
-//   }
+  else {
+    res.send({ message: 'login deleted.' })
+  }
 
-// })
+})
 
-// app.patch('/logins/:id', (req, res) => {
+app.patch('/logins/:id', (req, res) => {
 
-//   const id = req.params.id;
-//   const { userId, userSubredditerId, date, score } = req.body
+  const id = req.params.id;
+  const { status, dateCreated, time, userId } = req.body
 
-//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
-//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
+  const info = updateLogin.run(status, dateCreated, time, userId)
+  const updatedLogin = getLoginById.get(Number(id))
 
-//   if (info.changes > 0) {
-//     res.send(updateduserSubreddit)
-//   }
+  if (info.changes > 0) {
+    res.send(updatedLogin)
+  }
 
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 // #endregion
 
 // #region 'subreddits end points'
@@ -698,38 +738,43 @@ app.post('/subreddits', (req, res) => {
 
 })
 
-// app.delete('/subreddits/:id', (req, res) => {
+app.delete('/subreddits/:id', (req, res) => {
 
-//   const id = req.params.id
-//   const info = deleteuserSubreddit.run(id)
+  const id = req.params.id
 
-//   if (info.changes === 0) {
-//     res.status(404).send({ error: 'userSubreddit not found.' })
-//   } 
+  deleteAllUserSubredditsForSubreddit.run(id)
+  deleteAllPostsForSubreddit.run(id)
+  deleteAllCommentsForPost.run(id)
+
+  const info = deleteSubreddit.run(id)
+
+  if (info.changes === 0) {
+    res.status(404).send({ error: 'Subreddit not found.' })
+  } 
   
-//   else {
-//     res.send({ message: 'userSubreddit deleted.' })
-//   }
+  else {
+    res.send({ message: 'Subreddit deleted.' })
+  }
 
-// })
+})
 
-// app.patch('/subreddits/:id', (req, res) => {
+app.patch('/subreddits/:id', (req, res) => {
 
-//   const id = req.params.id;
-//   const { userId, userSubredditerId, date, score } = req.body
+  const id = req.params.id;
+  const { name, followers, online, dateCreated } = req.body
 
-//   const info = updateuserSubreddit.run(userId, userSubredditerId, date, score)
-//   const updateduserSubreddit = getuserSubredditById.get(Number(id))
+  const info = updateSubreddit.run(name, followers, online, dateCreated)
+  const updatedSubreddit = getSubredditById.get(Number(id))
 
-//   if (info.changes > 0) {
-//     res.send(updateduserSubreddit)
-//   }
+  if (info.changes > 0) {
+    res.send(updatedSubreddit)
+  }
 
-//   else {
-//     res.send({ error: 'Something went wrong.' })
-//   }
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
 
-// })
+})
 // #endregion
 
 
