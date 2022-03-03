@@ -176,6 +176,40 @@ const deleteAllUserSubredditsForSubreddit = db.prepare(`
 DELETE FROM userSubreddits WHERE subredditId = ?;
 `)
 
+
+const deleteAllUserPostsUpvotesForPosts = db.prepare(`
+DELETE FROM postUpvotes WHERE postId = ?;
+`)
+
+const deleteAllUserPostsUpvotesForUsers = db.prepare(`
+DELETE FROM postUpvotes WHERE userId = ?;
+`)
+
+const deleteAllUserPostsDownvotesForPosts = db.prepare(`
+DELETE FROM postDownvotes WHERE postId = ?;
+`)
+
+const deleteAllUserPostsDownvotesForUsers = db.prepare(`
+DELETE FROM postDownvotes WHERE userId = ?;
+`)
+
+const deleteAllUserCommentsUpvotesForComments = db.prepare(`
+DELETE FROM commentUpvotes WHERE commentId = ?;
+`)
+
+const deleteAllUserCommentsUpvotesForUsers = db.prepare(`
+DELETE FROM commentUpvotes WHERE userId = ?;
+`)
+
+const deleteAllUserCommentsDownvotesForComments = db.prepare(`
+DELETE FROM commentDownvotes WHERE commentId = ?;
+`)
+
+const deleteAllUserCommentsDownvotesForUsers = db.prepare(`
+DELETE FROM commentDownvotes WHERE userId = ?;
+`)
+
+
 const deleteAllLoginsForUser = db.prepare(`
 DELETE FROM logins WHERE userId = ?;
 `)
@@ -378,6 +412,12 @@ app.delete('/users/:id', (req, res) => {
   const id = req.params.id
 
   deleteAllUserSubredditsForUser.run(id)
+
+  deleteAllUserCommentsUpvotesForUsers.run(id)
+  deleteAllUserCommentsDownvotesForUsers.run(id)
+  deleteAllUserPostsUpvotesForUsers.run(id)
+  deleteAllUserPostsDownvotesForUsers.run(id)
+
   deleteAllPostsForUser.run(id)
   deleteAllLoginsForUser.run(id)
   deleteAllCommentsForUser.run(id)
@@ -903,6 +943,322 @@ app.patch('/subreddits/:id', (req, res) => {
   }
 
 })
+// #endregion
+
+// #region 'postUpvotes end points'
+app.get("/postUpvotes", (req, res) => {
+
+  const postUpvotes = getAllPostUpvotes.all();
+  res.send(postUpvotes);
+
+});
+
+app.get("/postUpvotes/:id", (req, res) => {
+
+  const id = req.params.id;
+  const postUpvote = getPostUpvoteById.get(id);
+
+  if (postUpvote) {
+    res.send(postUpvote);
+  }
+
+  else {
+    res.send({"error": "undefined"})
+  }
+
+});
+
+app.post('/postUpvotes', (req, res) => {
+
+  const { userId, postId } = req.body
+  const info = createPostUpvotes.run(userId, postId)
+
+  // const errors = []
+
+  // if (typeof name !== 'string') errors.push()
+
+  if (info.changes > 0) {
+    const postUpvote = getPostUpvoteById.get(info.lastInsertRowid)
+    res.send( postUpvote)
+  } 
+  
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
+
+})
+
+// app.delete('/postUpvotes/:id', (req, res) => {
+
+//   const id = req.params.id
+//   deleteUserSubreddit.run(id)
+
+//   const info = deleteUserSubreddit.run(id)
+
+//   if (info.changes === 0) {
+//     res.status(404).send({ error: 'userSubreddit not found.' })
+//   } 
+  
+//   else {
+//     res.send({ message: 'userSubreddit deleted.' })
+//   }
+
+// })
+
+// app.patch('/postUpvotes/:id', (req, res) => {
+
+//   const id = req.params.id;
+//   const { userId, subredditId } = req.body
+
+//   const info = updateUserSubreddit.run(userId, subredditId)
+//   const updatedUserSubreddit = getUserSubredditById.get(Number(id))
+
+//   if (info.changes > 0) {
+//     res.send(updatedUserSubreddit)
+//   }
+
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+// #endregion
+
+// #region 'postDownvotes end points'
+app.get("/postDownvotes", (req, res) => {
+
+  const postDownvotes = getAllPostDownvotes.all();
+  res.send(postDownvotes);
+
+});
+
+app.get("/postDownvotes/:id", (req, res) => {
+
+  const id = req.params.id;
+  const postDownvote = getPostDownvoteById.get(id);
+
+  if (postDownvote) {
+    res.send(postDownvote);
+  }
+
+  else {
+    res.send({"error": "undefined"})
+  }
+
+});
+
+app.post('/postDownvotes', (req, res) => {
+
+  const { userId, postId } = req.body
+  const info = createPostDownvotes.run(userId, postId)
+
+  // const errors = []
+
+  // if (typeof name !== 'string') errors.push()
+
+  if (info.changes > 0) {
+    const postDownvote = getPostDownvoteById.get(info.lastInsertRowid)
+    res.send(postDownvote)
+  } 
+  
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
+
+})
+
+// app.delete('/postDownvotes/:id', (req, res) => {
+
+//   const id = req.params.id
+//   deleteUserSubreddit.run(id)
+
+//   const info = deleteUserSubreddit.run(id)
+
+//   if (info.changes === 0) {
+//     res.status(404).send({ error: 'userSubreddit not found.' })
+//   } 
+  
+//   else {
+//     res.send({ message: 'userSubreddit deleted.' })
+//   }
+
+// })
+
+// app.patch('/postDownvotes/:id', (req, res) => {
+
+//   const id = req.params.id;
+//   const { userId, subredditId } = req.body
+
+//   const info = updateUserSubreddit.run(userId, subredditId)
+//   const updatedUserSubreddit = getUserSubredditById.get(Number(id))
+
+//   if (info.changes > 0) {
+//     res.send(updatedUserSubreddit)
+//   }
+
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+// #endregion
+
+// #region 'commentUpvotes end points'
+app.get("/commentUpvotes", (req, res) => {
+
+  const commentUpvotes = getAllCommentUpvotes.all();
+  res.send(commentUpvotes);
+
+});
+
+app.get("/commentUpvotes/:id", (req, res) => {
+
+  const id = req.params.id;
+  const commentUpvote = getCommentUpvoteById.get(id);
+
+  if (commentUpvote) {
+    res.send(commentUpvote);
+  }
+
+  else {
+    res.send({"error": "undefined"})
+  }
+
+});
+
+app.post('/commentUpvotes', (req, res) => {
+
+  const { userId, commentId } = req.body
+  const info = createCommentUpvotes.run(userId, commentId)
+
+  // const errors = []
+
+  // if (typeof name !== 'string') errors.push()
+
+  if (info.changes > 0) {
+    const commentUpvote = getCommentUpvoteById.get(info.lastInsertRowid)
+    res.send(commentUpvote)
+  } 
+  
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
+
+})
+
+// app.delete('/commentUpvotes/:id', (req, res) => {
+
+//   const id = req.params.id
+//   deleteUserSubreddit.run(id)
+
+//   const info = deleteUserSubreddit.run(id)
+
+//   if (info.changes === 0) {
+//     res.status(404).send({ error: 'userSubreddit not found.' })
+//   } 
+  
+//   else {
+//     res.send({ message: 'userSubreddit deleted.' })
+//   }
+
+// })
+
+// app.patch('/commentUpvotes/:id', (req, res) => {
+
+//   const id = req.params.id;
+//   const { userId, subredditId } = req.body
+
+//   const info = updateUserSubreddit.run(userId, subredditId)
+//   const updatedUserSubreddit = getUserSubredditById.get(Number(id))
+
+//   if (info.changes > 0) {
+//     res.send(updatedUserSubreddit)
+//   }
+
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
+// #endregion
+
+// #region 'commentDownvotes end points'
+app.get("/commentDownvotes", (req, res) => {
+
+  const commentDownvotes = getAllCommentDownvotes.all();
+  res.send(commentDownvotes);
+
+});
+
+app.get("/commentDownvotes/:id", (req, res) => {
+
+  const id = req.params.id;
+  const commentDownvote = getCommentDownvoteById.get(id);
+
+  if (commentDownvote) {
+    res.send(commentDownvote);
+  }
+
+  else {
+    res.send({"error": "undefined"})
+  }
+
+});
+
+app.post('/commentDownvotes', (req, res) => {
+
+  const { userId, commentId } = req.body
+  const info = createCommentDownvotes.run(userId, commentId)
+
+  // const errors = []
+
+  // if (typeof name !== 'string') errors.push()
+
+  if (info.changes > 0) {
+    const commentDownvote = getCommentDownvoteById.get(info.lastInsertRowid)
+    res.send(commentDownvote)
+  } 
+  
+  else {
+    res.send({ error: 'Something went wrong.' })
+  }
+
+})
+
+// app.delete('/commentDownvotes/:id', (req, res) => {
+
+//   const id = req.params.id
+//   deleteUserSubreddit.run(id)
+
+//   const info = deleteUserSubreddit.run(id)
+
+//   if (info.changes === 0) {
+//     res.status(404).send({ error: 'userSubreddit not found.' })
+//   } 
+  
+//   else {
+//     res.send({ message: 'userSubreddit deleted.' })
+//   }
+
+// })
+
+// app.patch('/commentDownvotes/:id', (req, res) => {
+
+//   const id = req.params.id;
+//   const { userId, subredditId } = req.body
+
+//   const info = updateUserSubreddit.run(userId, subredditId)
+//   const updatedUserSubreddit = getUserSubredditById.get(Number(id))
+
+//   if (info.changes > 0) {
+//     res.send(updatedUserSubreddit)
+//   }
+
+//   else {
+//     res.send({ error: 'Something went wrong.' })
+//   }
+
+// })
 // #endregion
 
 
