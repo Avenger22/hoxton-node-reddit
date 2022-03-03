@@ -1,8 +1,11 @@
+// #region "Importing stuff"
 import Database from 'better-sqlite3'
 
 const db = new Database('./data.db', {
   verbose: console.log
 })
+// #endregion
+
 
 // #region 'Mock data array of objects for db'
 const users = [
@@ -211,6 +214,82 @@ const userSubreddits = [
     subredditId: 3
   }
 ]
+
+const postUpvotes = [
+  {
+    userId: 2,
+    postId: 1
+  },
+  {
+    userId: 1,
+    postId: 1
+  },
+  {
+    userId: 3,
+    postId: 2
+  },
+  {
+    userId: 1,
+    postId: 3
+  }
+]
+
+const postDownvotes = [
+  {
+    userId: 3,
+    postId: 2
+  },
+  {
+    userId: 3,
+    postId: 1
+  },
+  {
+    userId: 1,
+    postId: 2
+  },
+  {
+    userId: 4,
+    postId: 3
+  }
+]
+
+const commentUpvotes = [
+  {
+    userId: 2,
+    commentId: 1
+  },
+  {
+    userId: 1,
+    commentId: 1
+  },
+  {
+    userId: 3,
+    commentId: 2
+  },
+  {
+    userId: 1,
+    commentId: 3
+  }
+]
+
+const commentDownvotes = [
+  {
+    userId: 2,
+    commentId: 3
+  },
+  {
+    userId: 1,
+    commentId: 2
+  },
+  {
+    userId: 3,
+    commentId: 3
+  },
+  {
+    userId: 1,
+    commentId: 4
+  }
+]
 // #endregion
 
 
@@ -222,7 +301,10 @@ const userSubreddits = [
 // DROP TABLE IF EXISTS posts;
 // DROP TABLE IF EXISTS users;
 // DROP TABLE IF EXISTS comments;
-
+// DROP TABLE IF EXISTS postUpvotes;
+// DROP TABLE IF EXISTS postDownvotes;
+// DROP TABLE IF EXISTS commentUpvotes;
+// DROP TABLE IF EXISTS commentDownvotes;
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
@@ -287,8 +369,41 @@ CREATE TABLE IF NOT EXISTS logins (
   "userId" INTEGER NOT NULL,
   FOREIGN KEY ("userId") REFERENCES "users" ("id")
 );
+
+CREATE TABLE IF NOT EXISTS postUpvotes (
+  "id" INTEGER PRIMARY KEY,
+  "userId" INTEGER NOT NULL,
+  "postId" INTEGER NOT NULL,
+  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
+  FOREIGN KEY ("postId") REFERENCES "posts" ("id")
+);
+
+CREATE TABLE IF NOT EXISTS postDownvotes (
+  "id" INTEGER PRIMARY KEY,
+  "userId" INTEGER NOT NULL,
+  "postId" INTEGER NOT NULL,
+  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
+  FOREIGN KEY ("postId") REFERENCES "posts" ("id")
+);
+
+CREATE TABLE IF NOT EXISTS commentUpvotes (
+  "id" INTEGER PRIMARY KEY,
+  "userId" INTEGER NOT NULL,
+  "commentId" INTEGER NOT NULL,
+  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
+  FOREIGN KEY ("commentId") REFERENCES "comments" ("id")
+);
+
+CREATE TABLE IF NOT EXISTS commentDownvotes (
+  "id" INTEGER PRIMARY KEY,
+  "userId" INTEGER NOT NULL,
+  "commentId" INTEGER NOT NULL,
+  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
+  FOREIGN KEY ("commentId") REFERENCES "comments" ("id")
+);
 `)
 // #endregion
+
 
 // #region 'Insert querys'
 export const createUser = db.prepare(`
@@ -297,6 +412,22 @@ INSERT INTO users ( firstName, lastName, userName, gender, birthday, phoneNumber
 
 export const createComment = db.prepare(`
 INSERT INTO comments (content, upVotes, downVotes, dateCreated, userId, postId) VALUES (?, ?, ?, ?, ?, ?);
+`)
+
+export const createPostUpvotes = db.prepare(`
+INSERT INTO userUpvotes (userId, postId) VALUES (?, ?);
+`)
+
+export const createPostDownvotes = db.prepare(`
+INSERT INTO postDownvotes (userId, postId) VALUES (?, ?);
+`)
+
+export const createCommentUpvotes = db.prepare(`
+INSERT INTO commentUpvotes (userId, commentId) VALUES (?, ?);
+`)
+
+export const createCommentDownvotes = db.prepare(`
+INSERT INTO commentDownvotes (userId, commentId) VALUES (?, ?);
 `)
 
 export const createUserSubreddit = db.prepare(`
@@ -315,6 +446,7 @@ export const createSubreddit = db.prepare(`
 INSERT INTO subreddits (name, followers, online, dateCreated ) VALUES (?, ? ,?, ?);
 `)
 // #endregion
+
 
 // #region 'For of loops to insert from mockdata to db with running the sql query'
 for (const user of users) {
@@ -339,5 +471,21 @@ for (const userSubreddit of userSubreddits) {
 
 for (const comment of comments) {
   createComment.run(comment.content, comment.upVotes, comment.downVotes, comment.dateCreated, comment.userId, comment.postId)
+}
+
+for (const postUpvote of postUpvotes) {
+  createPostUpvotes.run((postUpvote.userId, postUpvote.postId))
+}
+
+for (const postDownvote of postDownvotes) {
+  createPostDownvotes.run((postDownvote.userId, postDownvote.postId))
+}
+
+for (const commentUpvote of commentUpvotes) {
+  createCommentUpvotes.run((commentUpvote.userId, commentUpvote.commentId))
+}
+
+for (const commentDownvote of commentDownvotes) {
+  createCommentDownvotes.run((commentDownvote.userId, commentDownvote.commentId))
 }
 // #endregion

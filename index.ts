@@ -188,7 +188,8 @@ WHERE subredditId = ?;
 // #endregion
 
 
-// #region 'End points API'
+// #region "End points API"
+
 
 
 // #region 'users end points'
@@ -778,6 +779,6 @@ app.patch('/subreddits/:id', (req, res) => {
 // #endregion
 
 
-// #endregion
+
 
 app.listen(4000, () => console.log(`Listening on: http://localhost:4000`));
