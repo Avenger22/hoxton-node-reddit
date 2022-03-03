@@ -415,7 +415,7 @@ INSERT INTO comments (content, upVotes, downVotes, dateCreated, userId, postId) 
 `)
 
 export const createPostUpvotes = db.prepare(`
-INSERT INTO userUpvotes (userId, postId) VALUES (?, ?);
+INSERT INTO postUpvotes (userId, postId) VALUES (?, ?);
 `)
 
 export const createPostDownvotes = db.prepare(`

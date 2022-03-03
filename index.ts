@@ -2,8 +2,7 @@
 import express from "express";
 import Database from "better-sqlite3";
 import cors from "cors";
-import { createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser } from "./setup";
-// import {createuser, createuserSubreddit, createuserSubredditer} from "./setup"
+import { createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser, createPostUpvotes, createPostDownvotes, createCommentUpvotes, createCommentDownvotes } from "./setup";
 
 const app = express();
 app.use(cors());
@@ -42,6 +41,22 @@ SELECT * FROM posts;
 const getAllUserSubreddits = db.prepare(`
 SELECT userSubreddits.* FROM userSubreddits;
 `);
+
+const getAllPostUpvotes = db.prepare(`
+SELECT postUpvotes.* FROM postUpvotes;
+`);
+
+const getAllPostDownvotes = db.prepare(`
+SELECT postDownvotes.* FROM postDownvotes;
+`);
+
+const getAllCommentUpvotes = db.prepare(`
+SELECT commentUpvotes.* FROM commentUpvotes;
+`);
+
+const getAllCommentDownvotes = db.prepare(`
+SELECT commentDownvotes.* FROM commentDownvotes;
+`);
 // #endregion
 
 // #region 'Queries to get individual records from tables'
@@ -68,6 +83,22 @@ SELECT * FROM subreddits WHERE id = ?
 const getUserSubredditById = db.prepare(`
 SELECT * FROM userSubreddits WHERE id = ?
 `);
+
+const getPostUpvoteById = db.prepare(`
+SELECT * FROM postUpvotes WHERE id = ?
+`);
+
+const getPostDownvoteById = db.prepare(`
+SELECT * FROM postDownvotes WHERE id = ?
+`);
+
+const getCommentUpvoteById = db.prepare(`
+SELECT * FROM commentUpvotes WHERE id = ?
+`);
+
+const getCommentDownvoteById = db.prepare(`
+SELECT * FROM commentUpvotes WHERE id = ?
+`);
 // #endregion
 
 // #region 'Queries to update individual records from tables'
@@ -93,6 +124,22 @@ UPDATE comments SET content = ?, upVotes = ?, downVotes = ?, dateCreated = ?, us
 
 const updateUserSubreddit = db.prepare(`
 UPDATE userSubreddits SET userId = ?, subredditId = ?;
+`)
+
+const updatePostUpvote = db.prepare(`
+UPDATE postUpvotes SET userId = ?, postId = ?;
+`)
+
+const updatePostDownvote = db.prepare(`
+UPDATE postDownvotes SET userId = ?, postId = ?;
+`)
+
+const updateCommentUpvote = db.prepare(`
+UPDATE commentUpvotes SET userId = ?, commentId = ?;
+`)
+
+const updateCommentDownvote = db.prepare(`
+UPDATE commentDownvotes SET userId = ?, commentId = ?;
 `)
 // #endregion
 
@@ -159,6 +206,41 @@ const getSubredditsByUserId = db.prepare(`SELECT DISTINCT subreddits.* FROM subr
 JOIN userSubreddits ON subreddits.id = userSubreddits.subredditId
 WHERE userSubreddits.userId = ?;`) // if i want to remove duplicates just remove .date and .score and that new date with same entry will be removed
 
+
+const getUsersUpvotesByPostId = db.prepare(`SELECT DISTINCT users.* FROM users
+JOIN postUpvotes ON users.id = postUpvotes.userId
+WHERE postUpvotes.postId = ?;`)
+
+const getPostsUpvotesByUserId = db.prepare(`SELECT DISTINCT posts.* FROM posts
+JOIN postUpvotes ON posts.id = postUpvotes.postId
+WHERE postUpvotes.userId = ?;`) 
+
+const getUsersDownvotesByPostId = db.prepare(`SELECT DISTINCT users.* FROM users
+JOIN postDownvotes ON users.id = postDownvotes.userId
+WHERE postDownvotes.postId = ?;`)
+
+const getPostsDownvotesByUserId = db.prepare(`SELECT DISTINCT posts.* FROM posts
+JOIN postDownvotes ON posts.id = postDownvotes.postId
+WHERE postDownvotes.userId = ?;`) 
+
+
+const getUsersUpvotesByCommentId = db.prepare(`SELECT DISTINCT users.* FROM users
+JOIN commentUpvotes ON users.id = commentUpvotes.userId
+WHERE commentUpvotes.commentId = ?;`)
+
+const getCommentsUpvotesByUserId = db.prepare(`SELECT DISTINCT comments.* FROM comments
+JOIN commentUpvotes ON comment.id = postUpvotes.commentId
+WHERE commentDownvotes.userId = ?;`) 
+
+const getUsersDownvotesByCommentId = db.prepare(`SELECT DISTINCT users.* FROM users
+JOIN commentUpvotes ON users.id = commentUpvotes.userId
+WHERE commentUpvotes.commentId = ?;`)
+
+const getCommentsDownvotesByUserId = db.prepare(`SELECT DISTINCT comments.* FROM comments
+JOIN commentDownvotes ON comments.id = commentDownvotes.commentId
+WHERE commentDownvotes.userId = ?;`)
+
+
 const getPostsForUser = db.prepare(`
 SELECT * FROM posts
 WHERE userId = ?;
@@ -185,11 +267,11 @@ WHERE subredditId = ?;
 `);
 // #endregion
 
+
 // #endregion
 
 
 // #region "End points API"
-
 
 
 // #region 'users end points'
@@ -210,6 +292,18 @@ app.get("/users", (req, res) => {
 
     const logins = getLoginsForUser.all(user.id)
     user.logins = logins
+
+    const postsUpvotes = getPostsUpvotesByUserId.all(user.id)
+    user.postsUpvotes = postsUpvotes;
+
+    const postsDownvotes = getPostsDownvotesByUserId.all(user.id)
+    user.postsDownvotes = postsDownvotes;
+
+    const commentsUpvotes = getPostsUpvotesByUserId.all(user.id)
+    user.commentsUpvotes = commentsUpvotes;
+
+    const commentsDownvotes = getPostsDownvotesByUserId.all(user.id)
+    user.commentsDownvotes = commentsDownvotes;
 
   }
 
@@ -232,6 +326,21 @@ app.get("/users/:id", (req, res) => {
 
     const comments = getCommentsForUser.all(user.id)
     user.comments = comments
+
+    const logins = getLoginsForUser.all(user.id)
+    user.logins = logins
+
+    const postsUpvotes = getPostsUpvotesByUserId.all(user.id)
+    user.postsUpvotes = postsUpvotes;
+
+    const postsDownvotes = getPostsDownvotesByUserId.all(user.id)
+    user.postsDownvotes = postsDownvotes;
+
+    const commentsUpvotes = getPostsUpvotesByUserId.all(user.id)
+    user.commentsUpvotes = commentsUpvotes;
+
+    const commentsDownvotes = getPostsDownvotesByUserId.all(user.id)
+    user.commentsDownvotes = commentsDownvotes;
 
     res.send(user);
 
@@ -399,6 +508,12 @@ app.get("/posts", (req, res) => {
     const subreddit = getSubredditById.get(post.subredditId);
     post.subreddit = subreddit;
 
+    const usersUpvotes = getUsersUpvotesByPostId.all(user.id)
+    user.usersUpvotes = usersUpvotes;
+
+    const usersDownvotes = getUsersDownvotesByPostId.all(user.id)
+    user.usersDownvotes = usersDownvotes;
+
   }
 
   res.send(posts);
@@ -420,6 +535,12 @@ app.get("/posts/:id", (req, res) => {
 
       const subreddit = getSubredditById.get(post.subredditId);
       post.subreddit = subreddit;
+
+      const usersUpvotes = getUsersUpvotesByPostId.all(user.id)
+      user.usersUpvotes = usersUpvotes;
+
+      const usersDownvotes = getUsersDownvotesByPostId.all(user.id)
+      user.usersDownvotes = usersDownvotes;
 
       res.send(post);
 
@@ -500,6 +621,12 @@ app.get("/comments", (req, res) => {
 
     const posts = getPostById.get(comment.postId);
     comment.post = posts;
+
+    const usersUpvotes = getUsersUpvotesByCommentId.all(user.id)
+    user.usersUpvotes = usersUpvotes;
+
+    const usersDownvotes = getUsersDownvotesByCommentId.all(user.id)
+    user.usersDownvotes = usersDownvotes;
 
   }
 
@@ -779,6 +906,7 @@ app.patch('/subreddits/:id', (req, res) => {
 // #endregion
 
 
+// #endregion
 
 
 app.listen(4000, () => console.log(`Listening on: http://localhost:4000`));
