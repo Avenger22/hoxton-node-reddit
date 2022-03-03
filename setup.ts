@@ -307,6 +307,17 @@ const commentDownvotes = [
 // DROP TABLE IF EXISTS commentDownvotes;
 
 db.exec(`
+DROP TABLE IF EXISTS logins;
+DROP TABLE IF EXISTS commentUpvotes;
+DROP TABLE IF EXISTS commentDownvotes;
+DROP TABLE IF EXISTS postUpvotes;
+DROP TABLE IF EXISTS postDownvotes;
+DROP TABLE IF EXISTS userSubreddits;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS subreddits;
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE IF NOT EXISTS users (
   "id" INTEGER PRIMARY KEY,
   "firstName" TEXT NOT NULL,
