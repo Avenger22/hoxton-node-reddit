@@ -474,18 +474,18 @@ for (const comment of comments) {
 }
 
 for (const postUpvote of postUpvotes) {
-  createPostUpvotes.run((postUpvote.userId, postUpvote.postId))
+  createPostUpvotes.run(postUpvote.userId, postUpvote.postId)
 }
 
 for (const postDownvote of postDownvotes) {
-  createPostDownvotes.run((postDownvote.userId, postDownvote.postId))
+  createPostDownvotes.run(postDownvote.userId, postDownvote.postId)
 }
 
 for (const commentUpvote of commentUpvotes) {
-  createCommentUpvotes.run((commentUpvote.userId, commentUpvote.commentId))
+  createCommentUpvotes.run(commentUpvote.userId, commentUpvote.commentId)
 }
 
 for (const commentDownvote of commentDownvotes) {
-  createCommentDownvotes.run((commentDownvote.userId, commentDownvote.commentId))
+  createCommentDownvotes.run(commentDownvote.userId, commentDownvote.commentId)
 }
 // #endregion

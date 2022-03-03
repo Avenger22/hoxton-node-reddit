@@ -229,12 +229,12 @@ JOIN commentUpvotes ON users.id = commentUpvotes.userId
 WHERE commentUpvotes.commentId = ?;`)
 
 const getCommentsUpvotesByUserId = db.prepare(`SELECT DISTINCT comments.* FROM comments
-JOIN commentUpvotes ON comment.id = postUpvotes.commentId
-WHERE commentDownvotes.userId = ?;`) 
+JOIN commentUpvotes ON comments.id = commentUpvotes.commentId
+WHERE commentUpvotes.userId = ?;`) 
 
 const getUsersDownvotesByCommentId = db.prepare(`SELECT DISTINCT users.* FROM users
-JOIN commentUpvotes ON users.id = commentUpvotes.userId
-WHERE commentUpvotes.commentId = ?;`)
+JOIN commentDownvotes ON users.id = commentDownvotes.userId
+WHERE commentDownvotes.commentId = ?;`)
 
 const getCommentsDownvotesByUserId = db.prepare(`SELECT DISTINCT comments.* FROM comments
 JOIN commentDownvotes ON comments.id = commentDownvotes.commentId
@@ -299,10 +299,10 @@ app.get("/users", (req, res) => {
     const postsDownvotes = getPostsDownvotesByUserId.all(user.id)
     user.postsDownvotes = postsDownvotes;
 
-    const commentsUpvotes = getPostsUpvotesByUserId.all(user.id)
+    const commentsUpvotes = getCommentsUpvotesByUserId.all(user.id)
     user.commentsUpvotes = commentsUpvotes;
 
-    const commentsDownvotes = getPostsDownvotesByUserId.all(user.id)
+    const commentsDownvotes = getCommentsDownvotesByUserId.all(user.id)
     user.commentsDownvotes = commentsDownvotes;
 
   }
