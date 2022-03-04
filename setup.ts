@@ -17,7 +17,8 @@ const users = [
     gender: 'M',
     birthday: '22/12/1997',
     phoneNumber: '0631234511',
-    email: "jurgen@email.com"
+    email: "jurgen@email.com",
+    isOnline: 1
   },
   { 
     firstName: 'Gozzo',
@@ -26,7 +27,8 @@ const users = [
     gender: 'M',
     birthday: '22/11/1997',
     phoneNumber: '0631335511',
-    email: "Sundberg@email.com"  
+    email: "Sundberg@email.com",
+    isOnline: 1  
   },
   { 
     firstName: 'Iason',
@@ -35,7 +37,8 @@ const users = [
     gender: 'M',
     birthday: '12/12/1997',
     phoneNumber: '0671234511',
-    email: "Petőfi@email.com"
+    email: "Petőfi@email.com",
+    isOnline: 0
   },
   { 
     firstName: 'Ekin',
@@ -44,7 +47,8 @@ const users = [
     gender: 'M',
     birthday: '2/12/1994',
     phoneNumber: '0631234533',
-    email: "Machado@email.com"
+    email: "Machado@email.com",
+    isOnline: 0
   }
 ]
 
@@ -292,7 +296,8 @@ CREATE TABLE IF NOT EXISTS users (
   "gender" TEXT NOT NULL,
   "birthday" TEXT NOT NULL,
   "phoneNumber" TEXT NOT NULL,
-  "email" TEXT NOT NULL
+  "email" TEXT NOT NULL,
+  "isOnline" INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS subreddits (
@@ -379,7 +384,7 @@ CREATE TABLE IF NOT EXISTS commentDownvotes (
 
 // #region 'For of loops to insert from mockdata to db with running the sql query'
 for (const user of users) {
-  createUser.run(user.firstName, user.lastName, user.userName, user.gender, user.birthday, user.phoneNumber, user.email)
+  createUser.run(user.firstName, user.lastName, user.userName, user.gender, user.birthday, user.phoneNumber, user.email, user.isOnline)
 }
 
 for (const login of logins) {

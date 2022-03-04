@@ -1,4 +1,3 @@
-
 import Database from "better-sqlite3";
 
 const db = new Database("./data.db", {
@@ -7,7 +6,7 @@ const db = new Database("./data.db", {
 
 // #region 'Insert querys'
 export const createUser = db.prepare(`
-INSERT INTO users (firstName, lastName, userName, gender, birthday, phoneNumber, email) VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO users (firstName, lastName, userName, gender, birthday, phoneNumber, email, isOnline) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 `)
 
 export const createComment = db.prepare(`
