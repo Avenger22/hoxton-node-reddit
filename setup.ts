@@ -17,8 +17,7 @@ const users = [
     gender: 'M',
     birthday: '22/12/1997',
     phoneNumber: '0631234511',
-    email: "jurgen@email.com",
-    isOnline: 1
+    email: "jurgen@email.com"
   },
   { 
     firstName: 'Gozzo',
@@ -27,8 +26,7 @@ const users = [
     gender: 'M',
     birthday: '22/11/1997',
     phoneNumber: '0631335511',
-    email: "Sundberg@email.com",
-    isOnline: 0
+    email: "Sundberg@email.com"  
   },
   { 
     firstName: 'Iason',
@@ -37,8 +35,7 @@ const users = [
     gender: 'M',
     birthday: '12/12/1997',
     phoneNumber: '0671234511',
-    email: "Petőfi@email.com",
-    isOnline: 1  
+    email: "Petőfi@email.com"
   },
   { 
     firstName: 'Ekin',
@@ -47,8 +44,7 @@ const users = [
     gender: 'M',
     birthday: '2/12/1994',
     phoneNumber: '0631234533',
-    email: "Machado@email.com",
-    isOnline: 1 
+    email: "Machado@email.com"
   }
 ]
 
@@ -277,7 +273,6 @@ const commentDownvotes = [
 
 // #region 'Creating tables after droping etc sql'
 db.exec(`
-
 DROP TABLE IF EXISTS logins;
 DROP TABLE IF EXISTS commentUpvotes;
 DROP TABLE IF EXISTS commentDownvotes;
@@ -297,8 +292,7 @@ CREATE TABLE IF NOT EXISTS users (
   "gender" TEXT NOT NULL,
   "birthday" TEXT NOT NULL,
   "phoneNumber" TEXT NOT NULL,
-  "email" TEXT NOT NULL,
-  "isOnline" INTEGER NOT NULL CHECK ("isOnline" IN (0, 1))
+  "email" TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS subreddits (
@@ -385,7 +379,7 @@ CREATE TABLE IF NOT EXISTS commentDownvotes (
 
 // #region 'For of loops to insert from mockdata to db with running the sql query'
 for (const user of users) {
-  createUser.run(user.firstName, user.lastName, user.userName, user.gender, user.birthday, user.phoneNumber, user.email, user.isOnline)
+  createUser.run(user.firstName, user.lastName, user.userName, user.gender, user.birthday, user.phoneNumber, user.email)
 }
 
 for (const login of logins) {

@@ -7,7 +7,7 @@ const db = new Database("./data.db", {
 
 // #region 'Insert querys'
 export const createUser = db.prepare(`
-INSERT INTO users (firstName, lastName, userName, gender, birthday, phoneNumber, email, isOnline) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO users (firstName, lastName, userName, gender, birthday, phoneNumber, email) VALUES (?, ?, ?, ?, ?, ?, ?);
 `)
 
 export const createComment = db.prepare(`

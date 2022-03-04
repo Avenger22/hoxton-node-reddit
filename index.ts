@@ -107,7 +107,7 @@ SELECT * FROM posts WHERE userId = ?
 
 // #region 'Queries to update individual records from tables'
 const updateUser = db.prepare(`
-UPDATE users SET firstName = ?, lastName = ?, userName = ?, gender = ?, birthday = ?, phoneNumber = ?, email = ?, isOnline = ?;
+UPDATE users SET firstName = ?, lastName = ?, userName = ?, gender = ?, birthday = ?, phoneNumber = ?, email = ?;
 `)
 
 const updateLogin = db.prepare(`
@@ -411,10 +411,10 @@ app.post('/users', (req, res) => {
 
   // creating an museum is still the same as last week
   const { 
-    firstName, lastName, userName, gender, birthday, phoneNumber, email, isOnline
+    firstName, lastName, userName, gender, birthday, phoneNumber, email
   } = req.body
 
-  const info = createUser.run(firstName, lastName, userName, gender, birthday, phoneNumber, email, isOnline)
+  const info = createUser.run(firstName, lastName, userName, gender, birthday, phoneNumber, email)
 
   // const errors = []
 
