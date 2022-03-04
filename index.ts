@@ -99,6 +99,10 @@ SELECT * FROM commentUpvotes WHERE id = ?
 const getCommentDownvoteById = db.prepare(`
 SELECT * FROM commentUpvotes WHERE id = ?
 `);
+
+const getPostsByUserId = db.prepare(`
+SELECT * FROM posts WHERE userId = ?
+`);
 // #endregion
 
 // #region 'Queries to update individual records from tables'
@@ -389,7 +393,10 @@ app.get("/users/:id", (req, res) => {
 app.post('/users', (req, res) => {
 
   // creating an museum is still the same as last week
-  const { firstName, lastName, userName, gender, birthday, phoneNumber, email } = req.body
+  const { 
+    firstName, lastName, userName, gender, birthday, phoneNumber, email 
+  } = req.body
+
   const info = createUser.run(firstName, lastName, userName, gender, birthday, phoneNumber, email)
 
   // const errors = []
@@ -410,18 +417,6 @@ app.post('/users', (req, res) => {
 app.delete('/users/:id', (req, res) => {
  
   const id = req.params.id
-
-  deleteAllUserSubredditsForUser.run(id)
-
-  deleteAllUserCommentsUpvotesForUsers.run(id)
-  deleteAllUserCommentsDownvotesForUsers.run(id)
-  deleteAllUserPostsUpvotesForUsers.run(id)
-  deleteAllUserPostsDownvotesForUsers.run(id)
-
-  deleteAllPostsForUser.run(id)
-  deleteAllLoginsForUser.run(id)
-  deleteAllCommentsForUser.run(id)
-
   const info = deleteUser.run(id)
 
   if (info.changes === 0) {

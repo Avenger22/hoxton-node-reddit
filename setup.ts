@@ -294,18 +294,6 @@ const commentDownvotes = [
 
 
 // #region 'Creating tables after droping etc sql'
-
-// DROP TABLE IF EXISTS logins;
-// DROP TABLE IF EXISTS subreddits;
-// DROP TABLE IF EXISTS userSubreddits;
-// DROP TABLE IF EXISTS posts;
-// DROP TABLE IF EXISTS users;
-// DROP TABLE IF EXISTS comments;
-// DROP TABLE IF EXISTS postUpvotes;
-// DROP TABLE IF EXISTS postDownvotes;
-// DROP TABLE IF EXISTS commentUpvotes;
-// DROP TABLE IF EXISTS commentDownvotes;
-
 db.exec(`
 DROP TABLE IF EXISTS logins;
 DROP TABLE IF EXISTS commentUpvotes;
@@ -348,8 +336,8 @@ CREATE TABLE IF NOT EXISTS posts (
   "createdTime" TEXT NOT NULL,
   "userId" INTEGER NOT NULL,
   "subredditId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-  FOREIGN KEY ("subredditId") REFERENCES "subreddits" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE,
+  FOREIGN KEY ("subredditId") REFERENCES "subreddits" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -360,16 +348,16 @@ CREATE TABLE IF NOT EXISTS comments (
   "dateCreated" TEXT NOT NULL,
   "userId" INTEGER NOT NULL,
   "postId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-  FOREIGN KEY ("postId") REFERENCES "posts" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE,
+  FOREIGN KEY ("postId") REFERENCES "posts" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS userSubreddits (
   "id" INTEGER PRIMARY KEY,
   "userId" INTEGER NOT NULL,
   "subredditId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-  FOREIGN KEY ("subredditId") REFERENCES "subreddits" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE,
+  FOREIGN KEY ("subredditId") REFERENCES "subreddits" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS logins (
@@ -378,39 +366,39 @@ CREATE TABLE IF NOT EXISTS logins (
   "dateCreated" TEXT NOT NULL,
   "time" TEXT NOT NULL,
   "userId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS postUpvotes (
   "id" INTEGER PRIMARY KEY,
   "userId" INTEGER NOT NULL,
   "postId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-  FOREIGN KEY ("postId") REFERENCES "posts" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE,
+  FOREIGN KEY ("postId") REFERENCES "posts" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS postDownvotes (
   "id" INTEGER PRIMARY KEY,
   "userId" INTEGER NOT NULL,
   "postId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-  FOREIGN KEY ("postId") REFERENCES "posts" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE,
+  FOREIGN KEY ("postId") REFERENCES "posts" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS commentUpvotes (
   "id" INTEGER PRIMARY KEY,
   "userId" INTEGER NOT NULL,
   "commentId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-  FOREIGN KEY ("commentId") REFERENCES "comments" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE,
+  FOREIGN KEY ("commentId") REFERENCES "comments" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS commentDownvotes (
   "id" INTEGER PRIMARY KEY,
   "userId" INTEGER NOT NULL,
   "commentId" INTEGER NOT NULL,
-  FOREIGN KEY ("userId") REFERENCES "users" ("id"),
-  FOREIGN KEY ("commentId") REFERENCES "comments" ("id")
+  FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE CASCADE,
+  FOREIGN KEY ("commentId") REFERENCES "comments" ("id") ON DELETE CASCADE
 );
 `)
 // #endregion
