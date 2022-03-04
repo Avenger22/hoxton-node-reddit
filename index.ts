@@ -1,16 +1,11 @@
 // #region "importing and cofig stuff"
 import express from "express";
-import Database from "better-sqlite3";
 import cors from "cors";
-import { createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser, createPostUpvotes, createPostDownvotes, createCommentUpvotes, createCommentDownvotes } from "./insertQuerys";
+import { db, createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser, createPostUpvotes, createPostDownvotes, createCommentUpvotes, createCommentDownvotes } from "./insertQuerys";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-const db = new Database("./data.db", {
-  verbose: console.log,
-});
 // #endregion
 
 
@@ -409,12 +404,11 @@ app.get("/users/:id", (req, res) => {
 
 app.post('/users', (req, res) => {
 
-  // creating an museum is still the same as last week
   const { 
     firstName, lastName, userName, gender, birthday, phoneNumber, email, isOnline
   } = req.body
 
-  const info = createUser.run(firstName, lastName, userName, gender, birthday, phoneNumber, email, isOnline)
+  const info = createUser(req.body)
 
   // const errors = []
 
@@ -491,7 +485,7 @@ app.get("/userSubreddits/:id", (req, res) => {
 app.post('/userSubreddits', (req, res) => {
 
   const { userId, subbreditId } = req.body
-  const info = createUserSubreddit.run(userId, subbreditId)
+  const info = createUserSubreddit(req.body)
 
   // const errors = []
 
@@ -607,8 +601,8 @@ app.get("/posts/:id", (req, res) => {
 app.post('/posts', (req, res) => {
 
   // creating an museum is still the same as last week
-  const { title, content, linksTo, status, pic, votes, createdTime, userId, subredditId } = req.body
-  const info = createPost.run(title, content, linksTo, status, pic, votes, createdTime, userId, subredditId)
+  const { title, content, linksTo, status, pic, createdTime, userId, subredditId } = req.body
+  const info = createPost(req.body)
 
   // const errors = []
 
@@ -712,8 +706,8 @@ app.get("/comments/:id", (req, res) => {
 app.post('/comments', (req, res) => {
 
   // creating an museum is still the same as last week
-  const { content, upVotes, downVotes, dateCreated, userId, postId } = req.body
-  const info = createComment.run( content, upVotes, downVotes, dateCreated, userId, postId )
+  const { content, dateCreated, userId, postId } = req.body
+  const info = createComment(req.body)
 
   // const errors = []
 
@@ -804,7 +798,7 @@ app.post('/logins', (req, res) => {
 
   // creating an museum is still the same as last week
   const { status, dateCreated, time, userId } = req.body
-  const info = createLogin.run(status, dateCreated, time, userId)
+  const info = createLogin(req.body)
 
   // const errors = []
 
@@ -900,14 +894,16 @@ app.get("/subreddits/:id", (req, res) => {
 app.post('/subreddits', (req, res) => {
 
   // creating an museum is still the same as last week
-  const { name, followers, online, dateCreated } = req.body
-  const info = createSubreddit.run(name, followers, online, dateCreated)
+  const { name, dateCreated } = req.body
+  const info = createSubreddit(req.body)
 
   // const errors = []
 
   // if (typeof name !== 'string') errors.push()
 
+  // @ts-ignore
   if (info.changes > 0) {
+    //@ts-ignore
     const subreddits = getSubredditById.get(info.lastInsertRowid)
     res.send(subreddits)
   } 
@@ -983,7 +979,7 @@ app.get("/postUpvotes/:id", (req, res) => {
 app.post('/postUpvotes', (req, res) => {
 
   const { userId, postId } = req.body
-  const info = createPostUpvotes.run(userId, postId)
+  const info = createPostUpvotes(req.body)
 
   // const errors = []
 
@@ -1060,7 +1056,7 @@ app.get("/postDownvotes/:id", (req, res) => {
 app.post('/postDownvotes', (req, res) => {
 
   const { userId, postId } = req.body
-  const info = createPostDownvotes.run(userId, postId)
+  const info = createPostDownvotes(req.body)
 
   // const errors = []
 
@@ -1137,7 +1133,7 @@ app.get("/commentUpvotes/:id", (req, res) => {
 app.post('/commentUpvotes', (req, res) => {
 
   const { userId, commentId } = req.body
-  const info = createCommentUpvotes.run(userId, commentId)
+  const info = createCommentUpvotes(req.body)
 
   // const errors = []
 
@@ -1214,7 +1210,7 @@ app.get("/commentDownvotes/:id", (req, res) => {
 app.post('/commentDownvotes', (req, res) => {
 
   const { userId, commentId } = req.body
-  const info = createCommentDownvotes.run(userId, commentId)
+  const info = createCommentDownvotes(req.body)
 
   // const errors = []
 

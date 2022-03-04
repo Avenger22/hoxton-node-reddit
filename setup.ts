@@ -1,10 +1,5 @@
 // #region "Importing stuff"
-import Database from 'better-sqlite3'
-import { createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser, createPostUpvotes, createPostDownvotes, createCommentUpvotes, createCommentDownvotes } from "./insertQuerys";
-
-const db = new Database('./data.db', {
-  verbose: console.log
-})
+import { db, createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser, createPostUpvotes, createPostDownvotes, createCommentUpvotes, createCommentDownvotes } from "./insertQuerys";
 // #endregion
 
 
@@ -297,7 +292,7 @@ CREATE TABLE IF NOT EXISTS users (
   "birthday" TEXT NOT NULL,
   "phoneNumber" TEXT NOT NULL,
   "email" TEXT NOT NULL,
-  "isOnline" INTEGER
+  "isOnline" INTEGER DEFAULT 0 CHECK(isOnline IN(0,1))
 );
 
 CREATE TABLE IF NOT EXISTS subreddits (
@@ -384,42 +379,42 @@ CREATE TABLE IF NOT EXISTS commentDownvotes (
 
 // #region 'For of loops to insert from mockdata to db with running the sql query'
 for (const user of users) {
-  createUser.run(user.firstName, user.lastName, user.userName, user.gender, user.birthday, user.phoneNumber, user.email, user.isOnline)
+  createUser(user)
 }
 
 for (const login of logins) {
-  createLogin.run(login.status, login.dateCreated, login.time, login.userId)
+  createLogin(login)
 }
 
 for (const subreddit of subreddits) {
-  createSubreddit.run(subreddit.name, subreddit.dateCreated)
+  createSubreddit(subreddit)
 }
 
 for (const post of posts) {
-  createPost.run(post.title, post.content, post.linksTo, post.status, post.pic, post.createdTime, post.userId, post.subredditId)
+  createPost(post)
 }
 
 for (const userSubreddit of userSubreddits) {
-  createUserSubreddit.run(userSubreddit.userId, userSubreddit.subredditId)
+  createUserSubreddit(userSubreddit)
 }
 
 for (const comment of comments) {
-  createComment.run(comment.content, comment.dateCreated, comment.userId, comment.postId)
+  createComment(comment)
 }
 
 for (const postUpvote of postUpvotes) {
-  createPostUpvotes.run(postUpvote.userId, postUpvote.postId)
+  createPostUpvotes(postUpvote)
 }
 
 for (const postDownvote of postDownvotes) {
-  createPostDownvotes.run(postDownvote.userId, postDownvote.postId)
+  createPostDownvotes(postDownvote)
 }
 
 for (const commentUpvote of commentUpvotes) {
-  createCommentUpvotes.run(commentUpvote.userId, commentUpvote.commentId)
+  createCommentUpvotes(commentUpvote)
 }
 
 for (const commentDownvote of commentDownvotes) {
-  createCommentDownvotes.run(commentDownvote.userId, commentDownvote.commentId)
+  createCommentDownvotes(commentDownvote)
 }
 // #endregion
