@@ -1,10 +1,4 @@
-// #region "Database config"
-import Database from "better-sqlite3";
-
-export const db = new Database("./data.db", {
-    verbose: console.log,
-});
-// #endregion
+import {db} from "../dbConfig"
 
 // #region 'Insert querys'
 

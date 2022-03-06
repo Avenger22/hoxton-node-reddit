@@ -1,5 +1,6 @@
 // #region "Importing stuff"
-import { db, createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser, createPostUpvotes, createPostDownvotes, createCommentUpvotes, createCommentDownvotes } from "./insertQuerys";
+import { createComment, createLogin, createPost, createSubreddit, createUserSubreddit, createUser, createPostUpvotes, createPostDownvotes, createCommentUpvotes, createCommentDownvotes } from "./models/insertQuerysModel";
+import {db} from "./dbConfig"
 // #endregion
 
 
